@@ -22,20 +22,18 @@ module RuboCop
         end
 
         def has_raven_capture_exception?(node)
-          case node.type
-            when :send
-              raven_capture_exception?(node)
-            when :begin
-              node.children.any? { |c| raven_capture_exception?(c) }
+          if node.type == :begin
+            node.children.any? { |c| raven_capture_exception?(c) }
+          else
+            raven_capture_exception?(node)
           end
         end
 
         def has_raise?(node)
-          case node.type
-            when :send
-              raise?(node)
-            when :begin
-              node.children.any? { |c| raise?(c) }
+          if node.type == :begin
+            node.children.any? { |c| raise?(c) }
+          else
+            raise?(node)
           end
         end
 
@@ -46,7 +44,7 @@ module RuboCop
         end
 
         def raven?(node)
-          node.type == :const && node.children[1] == :Raven
+          node && node.type == :const && node.children[1] == :Raven
         end
 
         def raise?(node)

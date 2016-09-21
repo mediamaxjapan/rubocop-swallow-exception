@@ -57,4 +57,58 @@ describe RuboCop::SwallowException do
     expect(cop.messages.first).to match(/you have to/)
   end
 
+  it 'const など send でない場合のパターンも' do
+    inspect_source(cop, <<-EOS)
+      def verify_token(env)
+        token = BEARER_TOKEN_REGEX.match(env['HTTP_AUTHORIZATION'])[1]
+      rescue ::JWT::VerificationError => error
+        3
+      end
+    EOS
+    expect(cop.offenses.size).to eq(1)
+    expect(cop.messages.first).to match(/you have to/)
+  end
+
+  it '中でメソッド呼び出ししている場合の Raven チェックで例外が出ていた' do
+    inspect_source(cop, <<-EOS)
+      def verify_token(env)
+        token = BEARER_TOKEN_REGEX.match(env['HTTP_AUTHORIZATION'])[1]
+      rescue ::JWT::VerificationError => error
+        write_log(error)
+        return_error('token_signature_verification_failed')
+      end
+    EOS
+    expect(cop.offenses.size).to eq(1)
+    expect(cop.messages.first).to match(/you have to/)
+  end
+
+  it 'これも問題が発生したパターン。send で raven チェックがおかしかった' do
+    inspect_source(cop, <<-EOS)
+      def authenticate_user!
+        begin
+          user = User.find_by(id: env['jwt.payload'].try(:[], 'user_id'))
+          raise AccountError::NotFound if user.nil?
+          raise AccountError::Deactivated if user.user_status_deactive?
+          raise AccountError::Blocked if user.user_status_block?
+        rescue AccountError::NotFound => error
+          write_log(error)
+          render json: { execution_result: RESPONSE_ENUMS[:user_not_found] }, status: :ok
+        rescue AccountError::Deactivated => error
+          write_log(error)
+          render json: { execution_result: RESPONSE_ENUMS[:user_deactivated] }, status: :ok
+        rescue AccountError::Blocked => error
+          write_log(error)
+          render json: { execution_result: RESPONSE_ENUMS[:user_blocked] }, status: :ok
+        rescue StandardError => error
+          write_log(error)
+          render json: { execution_result: RESPONSE_ENUMS[:user_unknown_error] }, status: :ok
+        end
+      end
+    EOS
+    expect(cop.offenses.size).to eq(4)
+    (0..3).each do |i|
+      expect(cop.messages[i]).to match(/you have to/)
+    end
+  end
+
 end
