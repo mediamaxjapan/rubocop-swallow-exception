@@ -1,12 +1,12 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'rubocop/swallow/exception/version'
+require 'rubocop/swallow_exception/version'
 
 Gem::Specification.new do |spec|
   
   spec.name          = 'rubocop-swallow-exception'
-  spec.version       = Rubocop::Swallow::Exception::VERSION
+  spec.version       = RuboCop::SwallowException::VERSION
   spec.authors       = ['ONDA, Takashi']
   spec.email         = ['onda@mmj.ne.jp']
 
@@ -37,4 +37,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bundler', '~> 1.13'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
+
+  spec.add_runtime_dependency('rubocop', '~> 0.43.0')
+
 end
