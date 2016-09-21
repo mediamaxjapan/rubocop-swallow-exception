@@ -10,7 +10,7 @@ to understand why this Cop is required.
 Add this line to your application's Gemfile:
 
 ```ruby
-source 'https://www.mmj.ne.jp/gems'
+source 'https://www.mmj.ne.jp/gems
 gem 'rubocop-swallow-exception'
 ```
 
@@ -27,6 +27,8 @@ Or install it yourself as:
 Just add require option when you run rubocop.
 
     $ rubocop --require rubocop-swallow-exception
+    
+![example using in RubyMine](./rubocop-swallow-exception.png)
 
 
 ## License
