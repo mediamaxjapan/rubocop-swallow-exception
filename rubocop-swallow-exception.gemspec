@@ -13,10 +13,10 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{custom Cop forbids swallowing exception}
   spec.description   = <<-EOD
     This custom Cop forbids swallowing exception.
-    See Imamura's article.
-    https://confluence.mmj.ne.jp/display/HAN/Do+not+swallow+exceptions
+    See OWASP article.
+    https://www.owasp.org/index.php/Exception_handling_techniques#Swallowing_Exceptions
   EOD
-  spec.homepage      = 'https://stash.mmj.ne.jp/projects/MMJ/repos/rubocop-swallow-exception/browse'
+  spec.homepage      = 'https://github.com/mediamaxjapan/rubocop-swallow-exception'
   spec.license       = 'MIT'
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'

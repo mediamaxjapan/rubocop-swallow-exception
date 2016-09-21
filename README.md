@@ -1,7 +1,7 @@
 # rubocop-swallow-exception
 
 This is mmj's custom Cop that forbids swallowing exception.
-See [imamura's article](https://confluence.mmj.ne.jp/display/HAN/Do+not+swallow+exceptions)
+See [OWASP article](https://www.owasp.org/index.php/Exception_handling_techniques#Swallowing_Exceptions)
 to understand why this Cop is required.
 
 
@@ -10,7 +10,6 @@ to understand why this Cop is required.
 Add this line to your application's Gemfile:
 
 ```ruby
-source 'https://www.mmj.ne.jp/gems
 gem 'rubocop-swallow-exception'
 ```
 
