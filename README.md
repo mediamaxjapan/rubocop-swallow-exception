@@ -33,9 +33,10 @@ Just add require option when you run rubocop.
 
 ## Specification
 
-See spec file. 
 The Cop searches rescue body that does not contain raise statement in top level
-nor does not contain `Raven.capture_exception` ([Sentry](https://sentry.io) client) calling
+nor `Raven.capture_exception` ([Sentry](https://sentry.io) client) calling
+
+See spec file below in detail.
 
 
 ```ruby
@@ -47,7 +48,7 @@ describe RuboCop::SwallowException do
     expect(RuboCop::SwallowException::VERSION).not_to be(nil)
   end
 
-  it 'rescue body が空なら NG' do
+  it 'NG when rescue body is empty' do
     inspect_source(cop, <<-EOS)
       def bad_method
         p :hello
@@ -59,7 +60,7 @@ describe RuboCop::SwallowException do
     expect(cop.messages.first).to eq('rescue body is empty!')
   end
 
-  it 'rescue body トップレベルで条件なしに raise してれば OK' do
+  it 'OK when raise exception in top level' do
     inspect_source(cop, <<-EOS)
       def bad_method
         p :hello
@@ -72,7 +73,7 @@ describe RuboCop::SwallowException do
     expect(cop.offenses.size).to eq(0)
   end
 
-  it 'rescue body トップレベルで Raven.capture_exception 呼びだしてれば OK' do
+  it "OK when send error to Sentry, by using `Raven.capture_exception'" do
     inspect_source(cop, <<-EOS)
       def bad_method
         p :hello
@@ -83,7 +84,7 @@ describe RuboCop::SwallowException do
     expect(cop.offenses.size).to eq(0)
   end
 
-  it 'raise も Raven もなければ NG' do
+  it 'NG when rescue body does not contain raise nor Raven' do
     inspect_source(cop, <<-EOS)
       def bad_method
         p :hello
