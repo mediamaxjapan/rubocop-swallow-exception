@@ -1,24 +1,24 @@
 module RuboCop
   module Cop
-    module Lint
+    module SwallowException
 
-      class SwallowException < Cop
+      class SwallowException < Base
+
+        MSG = 'swallow exception found'
 
         def on_resbody(node)
-          # rescue の中身が空ならエラー
+          # disallow empty rescue block
           unless node.children[2]
-            add_offense(node, :expression, 'rescue body is empty!', :fatal)
+            add_offense(node)
             return
           end
           body = node.children[2]
-          # トップレベルで条件なしに raise していれば OK
+          # allow if raise new exception
           return if has_raise?(body)
-          # トップレベルで Raven.capture_exception 呼び出していれば OK
+          # allow if capture exception with Raven (Sentry)
           return if has_raven_capture_exception?(body)
-          # raise も Raven.capture_exception もなければエラー
-          add_offense(node, :expression, (<<-MSG).strip, :fatal)
-            you have to raise exception or capture exception by Raven in rescue body.
-          MSG
+          # disalow otherwise
+          add_offense(node)
         end
 
         def has_raven_capture_exception?(node)
@@ -54,7 +54,6 @@ module RuboCop
         end
 
       end
-
     end
   end
 end
