@@ -39,62 +39,72 @@ See spec file below in detail.
 
 
 ```ruby
-describe RuboCop::SwallowException do
+it 'offense: rescue body is empty' do
+  expect_offense(<<~RUBY)
+    def bad_method
+      p :hello
+    rescue => e
+    ^^^^^^^^^^^ swallow exception found
+      # do nothing
+    end
+  RUBY
+end
 
-  subject(:cop) { RuboCop::Cop::Lint::SwallowException.new }
+it 'ok: raise new exception without any condition' do
+  expect_no_offenses(<<~RUBY)
+    def bad_method
+      p :hello
+    rescue => e
+      log.error 'error occured'
+      log.error e.backtrace.join("\n")
+      raise e
+    end
+  RUBY
+end
 
-  it 'has a version number' do
-    expect(RuboCop::SwallowException::VERSION).not_to be(nil)
-  end
+it 'ok: call Raven.capture_exception' do
+  expect_no_offenses(<<~RUBY)
+    def bad_method
+      p :hello
+    rescue => e
+      Raven.capture_exception(e)
+    end
+  RUBY
+end
 
-  it 'NG when rescue body is empty' do
-    inspect_source(cop, <<-EOS)
-      def bad_method
-        p :hello
-      rescue => e
-        # do nothing
-      end
-    EOS
-    expect(cop.offenses.size).to eq(1)
-    expect(cop.messages.first).to eq('rescue body is empty!')
-  end
+it 'offense: logging only' do
+  expect_offense(<<~RUBY)
+    def bad_method
+      p :hello
+    rescue => e
+    ^^^^^^^^^^^ swallow exception found
+      log.error 'error occured'
+      log.error e.backtrace.join("\n")
+    end
+  RUBY
+end
 
-  it 'OK when raise exception in top level' do
-    inspect_source(cop, <<-EOS)
-      def bad_method
-        p :hello
-      rescue => e
-        log.error 'error occured'
-        log.error e.backtrace.join("\n")
-        raise e
-      end
-    EOS
-    expect(cop.offenses.size).to eq(0)
-  end
+it 'offense: just return value' do
+  expect_offense(<<~RUBY)
+    def verify_token(env)
+      token = BEARER_TOKEN_REGEX.match(env['HTTP_AUTHORIZATION'])[1]
+    rescue ::JWT::VerificationError => error
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ swallow exception found
+      3
+    end
+  RUBY
+end
 
-  it "OK when send error to Sentry, by using `Raven.capture_exception'" do
-    inspect_source(cop, <<-EOS)
-      def bad_method
-        p :hello
-      rescue => e
-        Raven.capture_exception(e)
-      end
-    EOS
-    expect(cop.offenses.size).to eq(0)
-  end
-
-  it 'NG when rescue body does not contain raise nor Raven' do
-    inspect_source(cop, <<-EOS)
-      def bad_method
-        p :hello
-      rescue => e
-        log.error 'error occured'
-        log.error e.backtrace.join("\n")
-      end
-    EOS
-    expect(cop.offenses.size).to eq(1)
-    expect(cop.messages.first).to match(/you have to/)
-  end
+it 'offense: only logging with some method, and just return value' do
+  expect_offense(<<~RUBY)
+    def verify_token(env)
+      token = BEARER_TOKEN_REGEX.match(env['HTTP_AUTHORIZATION'])[1]
+    rescue ::JWT::VerificationError => error
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ swallow exception found
+      write_log(error)
+      return_error('token_signature_verification_failed')
+    end
+  RUBY
 end
 
 ```
